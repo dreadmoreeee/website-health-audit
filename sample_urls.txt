@@ -1,0 +1,4 @@
+example.com
+https://demarkstudio.ca
+http://this-business-closed-years-ago.invalid
+https://www.python.org
