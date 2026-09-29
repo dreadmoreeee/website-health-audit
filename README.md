@@ -8,7 +8,7 @@ For every URL it looks at what a customer (and Google) runs into:
 - **Expired or parked:** registrar "lander" pages (including the JavaScript redirect GoDaddy uses), "Website expired" pages from site builders, domains for sale, "coming soon" placeholders.
 - **Hijacked:** the old domain now shows gambling or pharma spam.
 - **Outdated:** no HTTPS, not mobile-friendly, copyright year 3+ years old, frames/Flash, old jQuery.
-- **Losing customers:** phone number not tap-to-call, no contact form or online booking, slow first load, no page title or meta description.
+- **Losing customers:** a phone number shown but not tap-to-call, no contact form or online booking, slow first load, no page title or meta description.
 
 Each problem adds points, so the report is sorted by how badly the site needs work. I use it to find local businesses whose website is broken before offering to fix it.
 
@@ -20,14 +20,14 @@ Each problem adds points, so the report is sorted by how badly the site needs wo
 
 ```
 $ python site_audit.py sample_urls.txt --md sample_report.md --workers 4
- 10  http://example.com                             no HTTPS: browsers label it 'Not secure'; no meta description (hurts Google results); phone number is not tap-to-call
  10  http://this-business-closed-years-ago.invalid  domain does not resolve: the website is gone
-  2  https://www.python.org                         old jQuery 1.8; phone number is not tap-to-call
-  1  https://demarkstudio.ca                        phone number is not tap-to-call
+  9  http://example.com                             no HTTPS: browsers label it 'Not secure'; no meta description (hurts Google results); no contact form or online booking
+  1  https://www.python.org                         old jQuery 1.8
+  0  https://demarkstudio.ca
 
 $ python -m pytest -q
-.........
-9 passed in 0.78s
+............
+12 passed in 0.85s
 ```
 
 The tests start a local HTTP server that serves a healthy page, an outdated one, a GoDaddy-style JavaScript parking redirect, a spam takeover and a 404, so they run offline in under a second.

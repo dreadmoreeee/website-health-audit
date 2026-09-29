@@ -47,6 +47,9 @@ BUILDERS = (("wix.com", "Wix"), ("wixsite", "Wix"), ("weebly", "Weebly"), ("squa
             ("duda", "Duda"), ("site123", "Site123"))
 BOOKING_RE = re.compile(r"<form|book now|booking|appointment|reserv|calendly|square\.site|fresha|vagaro|"
                         r"schedul|order online", re.I)
+# A North American phone number in the visible text: (506) 555-0100, 506-555-0100, +1 506 555 0100.
+PHONE_RE = re.compile(r"(?<![\d/])(?:\+?1[ .-]?)?\(?[2-9]\d{2}\)?[ .-]\d{3}[ .-]\d{4}(?!\d)")
+TAG_RE = re.compile(r"<(script|style)[^>]*>.*?</\1>|<[^>]+>", re.S | re.I)
 COPYRIGHT_RE = re.compile(r"(?:©|&copy;|copyright)\s*(?:(?:19|20)\d{2}\s*[-–]\s*)?((?:19|20)\d{2})", re.I)
 
 
@@ -158,8 +161,8 @@ def audit(url: str, timeout: float = 15.0, this_year: int | None = None) -> Resu
         r.add(1, "no useful page title (hurts Google results)")
     if not re.search(r"<meta[^>]+name=[\"']?description", low):
         r.add(1, "no meta description (hurts Google results)")
-    if "tel:" not in low:
-        r.add(1, "phone number is not tap-to-call")
+    if "tel:" not in low and PHONE_RE.search(TAG_RE.sub(" ", html)):
+        r.add(1, "phone number is shown but not tap-to-call")
     if not BOOKING_RE.search(html):
         r.add(1, "no contact form or online booking")
     if secs > 5:

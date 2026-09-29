@@ -18,7 +18,7 @@ OLD = """<html><head><title>Home</title></head><body><table><tr><td>Welcome!</td
 PARKED_JS = '<!DOCTYPE html><html><head><script>window.onload=function(){window.location.href="/lander"}</script></head></html>'
 SPAM = "<html><head><title>x</title></head><body>" + "slot gacor situs slot casino online " * 5 + "</body></html>"
 
-PAGES = {"/good": (200, GOOD), "/old": (200, OLD), "/parked": (200, PARKED_JS), "/spam": (200, SPAM),
+PAGES = {"/phone": (200, "<html><head><title>Bakery</title></head><body><p>Call (506) 555-0199</p></body></html>"), "/good": (200, GOOD), "/old": (200, OLD), "/parked": (200, PARKED_JS), "/spam": (200, SPAM),
          "/missing": (404, "<html><title>Not found</title></html>")}
 
 
@@ -111,3 +111,20 @@ def test_reports_are_sorted_worst_first(base, tmp_path):
     assert scores == sorted(scores, reverse=True)
     assert "/parked" in rows[1]
     assert out_md.read_text(encoding="utf-8").startswith("# Website health report")
+
+
+def test_tap_to_call_only_flagged_when_a_phone_is_shown():
+    assert site_audit.PHONE_RE.search("Call us at (506) 555-0100 today")
+    assert site_audit.PHONE_RE.search("+1 506 555 0100")
+    assert not site_audit.PHONE_RE.search("Invoice 2026-09-28, order 12345678")
+    assert not site_audit.PHONE_RE.search("/img/506-555-0100.png".replace("-", ""))
+
+
+def test_page_without_any_phone_is_not_flagged(base):
+    r = site_audit.audit(base + "/old", this_year=2026)   # no phone number and no tel: link
+    assert not any("tap-to-call" in p for p in r.problems)
+
+
+def test_visible_phone_without_tel_link_is_flagged(base):
+    r = site_audit.audit(base + "/phone", this_year=2026)
+    assert "phone number is shown but not tap-to-call" in r.problems
